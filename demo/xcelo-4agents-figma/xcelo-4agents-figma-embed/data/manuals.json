@@ -1,0 +1,17 @@
+[
+  {
+    "material": "titanium",
+    "max_rpm": 6000,
+    "notes": "Prefer climb milling for finish. Coolant ON."
+  },
+  {
+    "material": "aluminum",
+    "max_rpm": 18000,
+    "notes": "Aggressive stepover allowed; watch chatter."
+  },
+  {
+    "material": "steel",
+    "max_rpm": 8000,
+    "notes": "Consider balanced toolholders; moderate feed."
+  }
+]

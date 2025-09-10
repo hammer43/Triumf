@@ -1,0 +1,37 @@
+[
+  {
+    "id": "J-4401",
+    "material": "titanium",
+    "time_min": 127,
+    "cost_eur": 430,
+    "result": "pass"
+  },
+  {
+    "id": "J-4472",
+    "material": "titanium",
+    "time_min": 118,
+    "cost_eur": 410,
+    "result": "rework"
+  },
+  {
+    "id": "J-4499",
+    "material": "titanium",
+    "time_min": 125,
+    "cost_eur": 428,
+    "result": "pass"
+  },
+  {
+    "id": "J-5101",
+    "material": "aluminum",
+    "time_min": 62,
+    "cost_eur": 120,
+    "result": "pass"
+  },
+  {
+    "id": "J-6188",
+    "material": "steel",
+    "time_min": 98,
+    "cost_eur": 210,
+    "result": "scrap"
+  }
+]

@@ -1,0 +1,43 @@
+[
+  {
+    "material": "titanium",
+    "baseQuality": 94,
+    "predRa": 18,
+    "refRa": 16,
+    "risks": [
+      "Chatter risk on feature B",
+      "Tool wear may affect tolerance"
+    ],
+    "suggestions": [
+      "Reduce stepover to 0.15 mm",
+      "Enable flood coolant",
+      "Probe bore_B in-process"
+    ]
+  },
+  {
+    "material": "aluminum",
+    "baseQuality": 90,
+    "predRa": 20,
+    "refRa": 18,
+    "risks": [
+      "Finish variance at high RPM"
+    ],
+    "suggestions": [
+      "Limit stick-out to \u22643\u00d7D",
+      "Consider trochoidal entry"
+    ]
+  },
+  {
+    "material": "steel",
+    "baseQuality": 88,
+    "predRa": 22,
+    "refRa": 20,
+    "risks": [
+      "Thermal buildup on long passes"
+    ],
+    "suggestions": [
+      "Add intermediate dwell for cooling",
+      "Balanced toolholder"
+    ]
+  }
+]

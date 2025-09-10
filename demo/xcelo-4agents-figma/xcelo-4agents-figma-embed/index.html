@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Xcelo – Figma + Agents Demo</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial;background:#0d1117;color:#e6edf3}
+    header{padding:16px 20px;border-bottom:1px solid #20262e;background:#0f1420}
+    header h1{margin:0;font-size:20px;letter-spacing:.4px}
+    header .tag{margin:4px 0 0;color:#9fb0c3;font-size:13px}
+    .layout{display:grid;grid-template-columns:1fr 420px;gap:12px;height:calc(100vh - 64px)}
+    .figmaPane{padding:12px}
+    .figmaPane iframe{width:100%;height:100%;border:1px solid #1f2630;border-radius:12px;background:#0b1320}
+    .panel{padding:12px;overflow:auto;border-left:1px solid #1f2630;background:#0f1724}
+    .card{background:#0f1724;border:1px solid #1f2630;border-radius:12px;padding:12px;margin-bottom:12px}
+    .card h2{margin:0 0 8px;font-size:14px;color:#dbe7ff}
+    pre{background:#0b1320;border:1px solid #223046;border-radius:8px;padding:10px;white-space:pre-wrap;max-height:180px;overflow:auto}
+    .note{color:#9fb0c3;font-size:12px}
+    .micro{color:#74879b;font-size:11px;margin-top:6px}
+    .badge{margin-top:6px;display:inline-block;background:#0b2e2a;color:#7fe7c4;border:1px solid #12473f;border-radius:999px;padding:3px 8px;font-size:11px}
+    .kpi{color:#a7d1ff;font-size:12px}
+    .save{color:#7fe7c4;font-size:12px}
+    .score span{display:inline-block;font-size:24px;font-weight:700;background:#0b1320;border:1px solid #223046;border-radius:10px;padding:6px 10px}
+    .prompt{display:flex;gap:8px;margin-bottom:10px}
+    .prompt textarea{flex:1;min-height:60px;border-radius:8px;border:1px solid #223046;background:#0b1320;color:#e6edf3;padding:8px}
+    .prompt button{background:#1b6cf0;border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+    footer{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid #20262e;background:#0f1420}
+    footer .status{display:flex;gap:16px;color:#9fb0c3;font-size:12px}
+    footer button{background:#0ea5e9;color:#07263a;border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer}
+    @media(max-width:1100px){.layout{grid-template-columns:1fr} .panel{height:auto;position:relative} footer{position:relative} }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Xcelo – Live Prototype + Agent Outputs</h1>
+    <div class="tag">The AI Nerve Center for Modern Manufacturing</div>
+  </header>
+
+  <div class="layout">
+    <div class="figmaPane">
+      <iframe src="https://embed.figma.com/proto/iHmun1KKEGI9Vb3q150HXE/Excelo?node-id=2-2&t=0hhidCa8Ewwny7S7-1&embed-host=share" allowfullscreen></iframe>
+    </div>
+    <div class="panel">
+      <div class="prompt">
+        <textarea id="nlp" placeholder="Mill 80×40×20 mm titanium bracket, Ra ≤16; AS9100 FAI."></textarea>
+        <button id="runBtn">Run Orchestrator</button>
+      </div>
+
+      <div class="card" id="ncPlan">
+        <h2>NC Plan</h2>
+        <pre id="ncSnippet">(generated)</pre>
+        <p class="note" id="ncRationale"></p>
+        <p class="micro">Sensor context: vibration, temperature, spindle load</p>
+      </div>
+
+      <div class="card" id="qualityCard">
+        <h2>Quality</h2>
+        <div class="score"><span id="qScore">—</span></div>
+        <ul id="qRisks"></ul>
+        <div class="badge">Data source: Balluff vibration @5kHz, Temp @10Hz</div>
+      </div>
+
+      <div class="card" id="inspectionCard">
+        <h2>Inspection (Optimized)</h2>
+        <p id="inspResult">—</p>
+        <ol id="inspOrder"></ol>
+        <p class="micro">Uses inline probe / laser scan for fast pass/fail</p>
+      </div>
+
+      <div class="card" id="dataOrch">
+        <h2>Optimized Sensor Policy</h2>
+        <p id="policyRow">—</p>
+        <p class="kpi" id="policyKpi">—</p>
+      </div>
+
+      <div class="card" id="cascadeCard">
+        <h2>Cascade Risk</h2>
+        <p id="cascadePath">—</p>
+        <p class="save" id="cascadeSave">—</p>
+        <p class="micro">Predicted from spindle vibration + RFID-tagged tool ID</p>
+      </div>
+
+      <div class="card" id="networkCard">
+        <h2>Network</h2>
+        <p id="networkStats">Patterns shared today: — | Hours saved: —</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="status">
+      <span>✅ Vibration sensor active</span>
+      <span>✅ Inline probe OK</span>
+      <span>⚠️ Spindle RFID not detected</span>
+    </div>
+    <button id="exportBtn">Export Quality Passport (mock)</button>
+  </footer>
+
+  <script>
+    async function fetchJSON(path){ const res = await fetch(path); return res.json(); }
+    const state = { manuals:[], jobs:[], patterns:[], network:{patternsShared:27, hoursSaved:142} };
+
+    async function loadData(){
+      state.manuals = await fetchJSON('data/manuals.json');
+      state.jobs = await fetchJSON('data/jobs.json');
+      state.patterns = await fetchJSON('data/patterns.json');
+      renderNetwork();
+    }
+
+    function orchestrator(prompt){
+      const ctx = ContextAgent(prompt, state);
+      const pred = PredictionAgent(ctx, state);
+      const opt = OptimizationAgent(ctx, pred, state);
+      const net = NetworkAgent(ctx, pred, opt, state);
+      return {ctx, pred, opt, net};
+    }
+
+    function ContextAgent(prompt, state){
+      const mat = /titanium|aluminum|steel|gold/i.exec(prompt)?.[0]?.toLowerCase() || 'aluminum';
+      const raMatch = /ra\s*≤?\s*(\d+)/i.exec(prompt);
+      const ra = raMatch ? parseFloat(raMatch[1]) : 16;
+      const manual = state.manuals.find(m=>m.material===mat) || state.manuals[0];
+      const similar = state.jobs.filter(j=>j.material===mat).slice(0,3);
+      return {material:mat, targetRa:ra, manual, similar, prompt};
+    }
+
+    function PredictionAgent(ctx, state){
+      const pat = state.patterns.find(p=>p.material===ctx.material) || state.patterns[0];
+      let qualityScore = pat.baseQuality;
+      let risks = [...pat.risks];
+      if(ctx.targetRa < pat.refRa){ qualityScore -= 6; risks.push('Finish may miss strict Ra'); }
+      qualityScore = Math.max(0, Math.min(99, qualityScore));
+      const suggestions = pat.suggestions;
+      return {qualityScore, risks, suggestions, predRa: pat.predRa};
+    }
+
+    function OptimizationAgent(ctx, pred, state){
+      const features = ['bore_B','face_flatness','datum_A'];
+      let order = features;
+      let optimizedSeconds = 70;
+      if(pred.risks.some(r=>/chatter/i.test(r))){ order = ['bore_B','face_flatness','datum_A']; }
+      return {order, timeNaive:120, timeOptimized:optimizedSeconds, explanation:'Order maximizes early detection per second.'};
+    }
+
+    function NetworkAgent(ctx, pred, opt, state){
+      state.network.patternsShared += 1;
+      state.network.hoursSaved += Math.floor(Math.random()*8)+1;
+      return {shared: state.network.patternsShared, hours: state.network.hoursSaved};
+    }
+
+    function renderAll(result){
+      document.getElementById('ncSnippet').textContent = '(G90 G17 G21)\n(Tool: Ø12)\n...';
+      document.getElementById('ncRationale').textContent = `Using Ø12 stepover to meet Ra ≤${result.ctx.targetRa}; climb milling, coolant ON.`;
+      document.getElementById('qScore').textContent = result.pred.qualityScore;
+      const qRisks = document.getElementById('qRisks'); qRisks.innerHTML='';
+      result.pred.risks.forEach(r=>{ const li=document.createElement('li'); li.textContent=r; qRisks.appendChild(li); });
+      document.getElementById('inspResult').textContent = `Time: ${result.opt.timeNaive}s → ${result.opt.timeOptimized}s`;
+      const inspOrder=document.getElementById('inspOrder'); inspOrder.innerHTML='';
+      result.opt.order.forEach(f=>{ const li=document.createElement('li'); li.textContent=f; inspOrder.appendChild(li); });
+      document.getElementById('policyRow').textContent = 'Selected: Vibration 5kHz + Temp 10Hz (Balluff)';
+      document.getElementById('policyKpi').textContent = 'Data ↓93%, Detection ↑17% vs baseline';
+      document.getElementById('cascadePath').textContent = 'Tool wear → Chatter → Scrap';
+      document.getElementById('cascadeSave').textContent = 'Prevention: Change tool @10 parts → Save €8,000';
+      renderNetwork();
+    }
+
+    function renderNetwork(){
+      document.getElementById('networkStats').textContent = `Patterns shared today: ${state.network.patternsShared} | Hours saved: ${state.network.hoursSaved}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      document.getElementById('runBtn').addEventListener('click', ()=>{
+        const prompt = document.getElementById('nlp').value || 'Mill 80×40×20 mm titanium bracket, Ra ≤16';
+        const result = orchestrator(prompt);
+        renderAll(result);
+      });
+      document.getElementById('exportBtn').addEventListener('click', ()=>{ alert('Mock Quality Passport exported (demo).'); });
+    });
+  </script>
+</body>
+</html>
